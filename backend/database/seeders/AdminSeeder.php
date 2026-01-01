@@ -15,13 +15,23 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        $first_name = $this->command->ask('What is the user\'s first name?');
-        $last_name = $this->command->ask('What is the user\'s last name?');
-        $email = $this->command->ask('What is the user\'s email?');
-        $birth_date = $this->command->ask('What is the user\'s birth date? (YYYY-MM-DD)');
-        $gender = $this->command->choice('What is the user\'s gender?', ['male', 'female']);
-        $address = $this->command->ask('What is the user\'s address?');
-        $password = $this->command->secret('What is the user\'s password?');
+        // Sử dụng giá trị mặc định nếu không có input từ command line
+        $first_name = env('ADMIN_FIRST_NAME', 'Admin');
+        $last_name = env('ADMIN_LAST_NAME', 'System');
+        $email = env('ADMIN_EMAIL', 'admin@example.com');
+        $birth_date = env('ADMIN_BIRTH_DATE', '1990-01-01');
+        $gender = env('ADMIN_GENDER', 'male');
+        $address = env('ADMIN_ADDRESS', 'Default Address');
+        $password = env('ADMIN_PASSWORD', 'admin123');
+
+        // Kiểm tra xem admin đã tồn tại chưa
+        $existingAdmin = User::where('email', $email)->first();
+        if ($existingAdmin) {
+            if ($this->command) {
+                $this->command->info('Admin user already exists. Skipping...');
+            }
+            return;
+        }
 
         User::create([
             'role_id' => Role::where('name', '=', 'admin')->first()->id,
@@ -35,5 +45,11 @@ class AdminSeeder extends Seeder
             'is_active' => true,
             'password' => Hash::make($password)
         ]);
+
+        if ($this->command) {
+            $this->command->info('Admin user created successfully!');
+            $this->command->info('Email: ' . $email);
+            $this->command->info('Password: ' . $password);
+        }
     }
 }

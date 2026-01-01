@@ -13,22 +13,15 @@ class HomeController extends Controller
     public function index()
     {
         try {
-            if (config('custom.app.demo')) {
-                $credentials = json_encode([
-                    'email' => User::where('role_id', RoleType::ADMIN)->select('email')->first()->email,
-                    'password' => config('custom.demo_credentials.password')
-                ]);
-                $this->queueCookie('demo_credentials', $credentials);
-            } else {
-                Cookie::queue(Cookie::forget('demo_credentials'));
+            $baseScoreScale = Setting::get('exam_base_score_scale');
+            if ($baseScoreScale) {
+                $this->queueCookie('base_score_scale', $baseScoreScale);
             }
-
-            $this->queueCookie('base_score_scale', Setting::get('exam_base_score_scale'));
         } catch (\Exception $error) {
-            $this->handleException($error);
-        } finally {
-            return view('index');
+            \Log::error('HomeController error: ' . $error->getMessage());
         }
+        
+        return view('index');
     }
 
     public function privacy()

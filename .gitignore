@@ -6,6 +6,7 @@ docker/nginx/default.conf
 docker/nginx/nginx.conf
 docker/nginx/logs
 /redis-data
+/mysql-data
 
 # Ide
 /.fleet
