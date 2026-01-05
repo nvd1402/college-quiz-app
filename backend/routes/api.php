@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ChapterController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\ExamController;
 use App\Http\Controllers\Api\ExamResultController;
 use App\Http\Controllers\Api\FacultyController;
@@ -166,3 +167,17 @@ Route::prefix('/exam-results')->middleware(AUTH_MIDDLEWARES)
         Route::get('/user/{id}', 'getByUser');
         Route::get('/user/{id}/export', 'exportExamResultsByUser');
     });
+
+Route::prefix('/documents')->controller(DocumentController::class)->group(function () {
+    Route::middleware(AUTH_MIDDLEWARES)->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::get('/{id}/download', 'download'); // Tải xuống (chỉ admin/dev)
+        Route::get('/{id}', 'show');
+        Route::put('/{id}', 'update');
+        Route::delete('/{id}', 'destroy');
+    });
+    // Route view không cần middleware vì nó tự verify token từ query string
+    // Phải đặt sau các route có middleware để tránh conflict
+    Route::get('/{id}/view', 'view'); // Xem PDF trong browser (cho user thường) - hỗ trợ token trong query string
+});

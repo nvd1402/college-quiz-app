@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\DocumentViewController;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\ServeFilesController;
 use Illuminate\Support\Facades\Route;

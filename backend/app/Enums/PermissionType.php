@@ -46,4 +46,9 @@ enum PermissionType: string
     case USER_DELETE = 'user_delete';
     case USER_UPDATE = 'user_update';
     case USER_VIEW = 'user_view';
+    case DOCUMENT_CREATE = 'document_create';
+    case DOCUMENT_DELETE = 'document_delete';
+    case DOCUMENT_UPDATE = 'document_update';
+    case DOCUMENT_VIEW = 'document_view';
+    case DOCUMENT_DOWNLOAD = 'document_download';
 }

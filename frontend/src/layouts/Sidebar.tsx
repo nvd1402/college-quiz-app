@@ -2,7 +2,7 @@ import styles from './styles/Sidebar.module.css';
 
 import { useEffect } from 'react';
 import { IoSettingsOutline } from 'react-icons/io5';
-import { LuCircleUserRound, LuSchool } from 'react-icons/lu';
+import { LuCircleUserRound, LuFileText, LuSchool } from 'react-icons/lu';
 import { MdOutlineStickyNote2 } from 'react-icons/md';
 import {
     PiBooks,
@@ -66,6 +66,12 @@ export default function Sidebar() {
             to: 'subjects',
             icon: <PiBooks />,
             isActive: permissions.has('subject_view')
+        },
+        {
+            name: language?.documents || 'Tài liệu',
+            to: 'documents',
+            icon: <LuFileText />,
+            isActive: permissions.has('document_view')
         },
         {
             name: language?.faculty,

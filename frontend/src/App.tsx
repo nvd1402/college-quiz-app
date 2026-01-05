@@ -36,6 +36,8 @@ const TakeExam = lazy(() => import('./pages/Exams/TakeExam'));
 const Settings = lazy(() => import('./pages/Settings/Settings'));
 const Profile = lazy(() => import('./pages/Profile/Profile'));
 const StudentExamResults = lazy(() => import('./pages/ExamResults/Student'));
+const Documents = lazy(() => import('./pages/Documents/Documents'));
+const Document = lazy(() => import('./pages/Documents/Document'));
 
 const router = createBrowserRouter([
     {
@@ -203,6 +205,19 @@ const router = createBrowserRouter([
                             {
                                 path: 'students/:id',
                                 element: <Suspense key='exam-results-student' fallback={<SuspenseLoading />}><StudentExamResults /></Suspense>
+                            },
+                        ]
+                    },
+                    {
+                        path: 'documents',
+                        children: [
+                            {
+                                index: true,
+                                element: <Suspense key='documents' fallback={<SuspenseLoading />}><Documents /></Suspense>
+                            },
+                            {
+                                path: ':id',
+                                element: <Suspense key='document' fallback={<SuspenseLoading />}><Document /></Suspense>
                             },
                         ]
                     },

@@ -35,6 +35,8 @@ const keys = [
     'EXAM_RESULTS',
     'EXAM_RESULT',
     'EXAM_RESULTS_BY_USER',
+    'PAGE_DOCUMENTS',
+    'DOCUMENT_DETAIL',
 ] as const;
 
 type QueryKey = (typeof keys)[number];
