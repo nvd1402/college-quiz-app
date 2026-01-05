@@ -3,9 +3,9 @@ import styles from './styles/Document.module.css';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { MdDeleteOutline, MdDownload, MdEdit } from 'react-icons/md';
+import { MdDeleteOutline, MdEdit } from 'react-icons/md';
 import { Navigate, useNavigate, useParams } from 'react-router';
-import { apiDeleteDocument, apiGetDocumentById, getDocumentDownloadUrl, getDocumentViewUrl } from '~api/document';
+import { apiDeleteDocument, apiGetDocumentById, getDocumentViewUrl } from '~api/document';
 import Loading from '~components/Loading';
 import YesNoPopUp from '~components/YesNoPopUp';
 import QUERY_KEYS from '~constants/query-keys';
@@ -39,7 +39,6 @@ export default function Document() {
         });
         navigate('/documents');
     };
-    const canDownload = user?.isAdmin || permissions.has('document_download');
     useEffect(() => {
         return () => {
             queryClient.removeQueries({ queryKey: [QUERY_KEYS.DOCUMENT_DETAIL, { id: id }] });
@@ -49,6 +48,7 @@ export default function Document() {
         if (!queryData.data) return;
         appTitle.setAppTitle(queryData.data.title);
     }, [appTitle, queryData.data]);
+
     if (!permissions.has('document_view')) return <Navigate to='/' />;
     if (queryData.error) return (
         <main className={css(appStyles.dashboard, styles.pageContent)}>
@@ -127,22 +127,13 @@ export default function Document() {
                                 </div>
                                 <div className={styles.viewerActions}>
                                     <a
-                                        href={getDocumentViewUrl(queryData.data.id)}
+                                        href={getDocumentViewUrl(queryData.data.id, true)}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className={css(appStyles.actionItem, styles.viewButton)}
                                     >
                                         Xem PDF
                                     </a>
-                                    {canDownload && (
-                                        <a
-                                            href={getDocumentDownloadUrl(queryData.data.id)}
-                                            download
-                                            className={css(appStyles.actionItemWhite, styles.downloadButton)}
-                                        >
-                                            <MdDownload /> Tải xuống
-                                        </a>
-                                    )}
                                 </div>
                             </section>
                             <section className={styles.pdfViewer}>

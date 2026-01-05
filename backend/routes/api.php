@@ -180,4 +180,4 @@ Route::prefix('/documents')->controller(DocumentController::class)->group(functi
     // Route view không cần middleware vì nó tự verify token từ query string
     // Phải đặt sau các route có middleware để tránh conflict
     Route::get('/{id}/view', 'view'); // Xem PDF trong browser (cho user thường) - hỗ trợ token trong query string
-});
+    });

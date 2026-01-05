@@ -51,15 +51,26 @@ class DocumentViewController extends Controller
                 abort(404, 'File not found');
             }
 
-            // Trả về file để xem trong browser (inline)
-            return Storage::disk('upload')->response(
-                $document->file_path,
-                $document->file_name,
-                [
-                    'Content-Type' => $document->mime_type,
-                    'Content-Disposition' => 'inline; filename="' . $document->file_name . '"',
-                ]
-            );
+            // Tạo URL để load PDF từ API (với token)
+            $baseUrl = $request->getSchemeAndHttpHost();
+            $pdfUrl = $baseUrl . '/api/documents/' . $id . '/view?token=' . urlencode($token);
+
+            // Trả về view HTML wrapper với các biện pháp bảo vệ
+            $response = response()->view('documents.view', [
+                'document' => $document,
+                'pdfUrl' => $pdfUrl,
+            ]);
+            
+            // Remove CSP header từ middleware trước (nếu có)
+            $response->headers->remove('Content-Security-Policy');
+            
+            // Thêm headers để tránh bị Chrome chặn
+            // CSP: Cho phép inline scripts để chặn DevTools - QUAN TRỌNG: phải có 'unsafe-inline'
+            $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
+            $response->headers->set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; frame-src 'self' data: blob:; frame-ancestors 'self';");
+            $response->headers->set('X-Content-Type-Options', 'nosniff');
+            
+            return $response;
         } catch (\Exception $error) {
             abort(500, 'Error loading document');
         }
