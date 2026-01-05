@@ -34,14 +34,19 @@ export default function CreateSubject({
         const submitter = e.nativeEvent.submitter as HTMLButtonElement;
         const form = e.target as HTMLFormElement;
         const formData = new FormData(form);
-        await apiCreateSubject(formData);
-        if (submitter.name === 'save') handleClosePopUp();
-        else form.reset();
+        try {
+            await apiCreateSubject(formData);
+            // Wait a bit for the database to be ready
+            await new Promise(resolve => setTimeout(resolve, 100));
+            await onMutateSuccess();
+            if (submitter.name === 'save') handleClosePopUp();
+            else form.reset();
+        } catch (error) {
+            formUtils.showFormError(error);
+        }
     };
     const { mutate, isPending } = useMutation({
-        mutationFn: handleCreateFaculty,
-        onError: (error) => { formUtils.showFormError(error); },
-        onSuccess: onMutateSuccess
+        mutationFn: handleCreateFaculty
     });
     return (
         <div className={

@@ -26,7 +26,9 @@ export default function Subjects() {
     const queryData = useQuery({
         queryKey: [QUERY_KEYS.PAGE_SUBJECTS, { search: queryDebounce }],
         queryFn: () => apiGetSubjects(queryDebounce),
-        enabled: permissions.has('subject_view')
+        enabled: permissions.has('subject_view'),
+        staleTime: 0, // Always consider data stale to allow refetch
+        refetchOnWindowFocus: false
     });
     useEffect(() => {
         if (!searchParams.get('search') && !queryDebounce) return;
@@ -34,9 +36,13 @@ export default function Subjects() {
         else searchParams.set('search', queryDebounce);
         setSearchParams(searchParams);
     }, [queryDebounce, searchParams, setSearchParams]);
-    const onMutateSuccess = () => {
-        [QUERY_KEYS.PAGE_SUBJECTS].forEach(key => {
-            queryClient.refetchQueries({ queryKey: [key] });
+    const onMutateSuccess = async () => {
+        // Invalidate all queries with PAGE_SUBJECTS prefix
+        await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PAGE_SUBJECTS] });
+        // Refetch all queries matching the prefix (will refetch current query)
+        await queryClient.refetchQueries({ 
+            queryKey: [QUERY_KEYS.PAGE_SUBJECTS],
+            type: 'active' // Only refetch active queries
         });
     };
     useEffect(() => {
@@ -47,7 +53,13 @@ export default function Subjects() {
         <>
             {showCreatePopUp === true ?
                 <CreateSubject
-                    onMutateSuccess={onMutateSuccess}
+                    onMutateSuccess={async () => {
+                        await onMutateSuccess();
+                        // Force refetch with a small delay to ensure database is ready
+                        setTimeout(() => {
+                            queryData.refetch();
+                        }, 200);
+                    }}
                     setShowPopUp={setShowCreatePopUp}
                 /> : null}
             <main className={appStyles.dashboard}>
@@ -88,7 +100,7 @@ export default function Subjects() {
                     </div>
                     <div className={styles.wrapCardContainer}>
                         <div className={styles.cardContainer}>
-                            {queryData.data ?
+                            {queryData.data && queryData.data.length > 0 ? (
                                 queryData.data.map(item => {
                                     return (
                                         <Link
@@ -107,7 +119,12 @@ export default function Subjects() {
                                             </div>
                                         </Link>
                                     );
-                                }) : null}
+                                })
+                            ) : queryData.isLoading ? null : (
+                                <div style={{ padding: '20px', textAlign: 'center' }}>
+                                    {language?.noData || 'Không có dữ liệu'}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </section>

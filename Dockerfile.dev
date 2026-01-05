@@ -1,0 +1,67 @@
+# Frontend Development Stage
+FROM node:alpine AS frontend
+WORKDIR /app
+# Dependencies will be installed via volume mount in docker-compose
+
+# Backend Development Stage
+FROM php:8.2-fpm-alpine AS backend
+
+RUN apk update && apk add --no-cache \
+    freetype-dev \
+    libjpeg-turbo-dev \
+    libpng-dev \
+    libwebp-dev \
+    libxpm-dev \
+    icu-dev \
+    libxml2-dev \
+    libzip-dev \
+    oniguruma-dev \
+    zlib-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install -j$(nproc) gd intl opcache pdo pdo_mysql zip ftp
+
+# Redis extension
+RUN apk --no-cache add pcre-dev ${PHPIZE_DEPS} \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    && apk del pcre-dev ${PHPIZE_DEPS} \
+    && rm -rf /tmp/pear
+
+WORKDIR /var/www/college-quiz-app
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+
+# Grant permissions (will be overridden by volumes, but needed for initial setup)
+RUN chown -R www-data:www-data /var/www/college-quiz-app
+RUN chmod -R 775 /var/www/college-quiz-app
+
+# Copy PHP configs
+COPY ./docker/php/php.ini /usr/local/etc/php/php.ini
+COPY ./docker/php/zz-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
+COPY ./docker/php/docker-php-ext-opcache.ini /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini
+
+# Copy entrypoint script for dev
+COPY ./docker/entrypoint.dev.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Handle php-fpm via unix socket
+RUN mkdir -p /var/run/php-fpm && \
+    chown -R www-data:www-data /var/run/php-fpm
+
+EXPOSE 9000
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+# Nginx Stage
+FROM nginx:alpine AS nginx
+
+RUN apk add --no-cache \
+    nginx
+
+# Copy nginx config will be done via volume mount in docker-compose
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
+

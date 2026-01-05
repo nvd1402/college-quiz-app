@@ -9,6 +9,8 @@ export default {
     save: 'Save',
     name: 'Name',
     shortcode: 'Shortcode',
+    document: 'PDF Document',
+    viewDocument: 'View Document',
     chapters: 'Chapters',
     questions: 'Questions'
 };

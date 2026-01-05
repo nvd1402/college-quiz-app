@@ -9,6 +9,8 @@ export default {
     save: 'Lưu',
     name: 'Tên',
     shortcode: 'Mã số',
+    document: 'Tài liệu PDF',
+    viewDocument: 'Xem tài liệu',
     chapters: 'Chương',
     questions: 'Câu hỏi'
 };

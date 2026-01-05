@@ -8,6 +8,7 @@ export default {
         // perPage: 'Rows',
         search: 'Search'
     },
+    viewDocument: 'View PDF Document',
     langYes: 'Yes',
     langNo: 'No'
 };

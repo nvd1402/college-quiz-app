@@ -18,7 +18,8 @@ export async function apiGetSubjects(query: string) {
         const { data } = res.data as ApiResponseWithData<Subject[]>;
         return data;
     } catch (error: any) {
-        return apiUtils.handleError(error);
+        apiUtils.handleError(error);
+        throw error;
     }
 }
 
@@ -38,23 +39,20 @@ export async function apiCreateSubject(formData: FormData) {
         const apiPath = prefix;
         await request.post(apiPath, formData);
     } catch (error: any) {
-        return apiUtils.handleError(error);
+        apiUtils.handleError(error);
+        throw error;
     }
 }
 
 export async function apiUpdateSubject(formData: FormData, id: string | number) {
     try {
         const apiPath = `${prefix}/${id}`;
-        const data = encodeFormData(formData);
-        await request.put(apiPath, data, {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        });
+        await request.put(apiPath, formData);
     } catch (error: any) {
         return apiUtils.handleError(error);
     }
 }
+
 
 export async function apiDeleteSubject(id: string | number) {
     try {
@@ -79,3 +77,4 @@ export async function apiAutoCompleteSubject(search: string) {
         return apiUtils.handleError(error);
     }
 }
+

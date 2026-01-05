@@ -40,7 +40,8 @@ class Subject extends Model
 
     protected $fillable = [
         'shortcode',
-        'name'
+        'name',
+        'document_path'
     ];
 
     protected $hidden = [

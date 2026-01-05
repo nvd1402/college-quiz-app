@@ -19,13 +19,22 @@ class SubjectController extends Controller
         abort_if(!$user->hasPermission(PermissionType::SUBJECT_VIEW), 403);
 
         try {
-            $subjects = Subject::select('*');
+            $subjects = Subject::select(['id', 'shortcode', 'name', 'created_at', 'updated_at']);
             if ($request->input('search') != null) {
                 $subjects = $subjects->whereFullText(Subject::FULLTEXT, $request->input('search'));
             }
             $subjects = $subjects
-                ->limit($this->defaultLimit)
-                ->get();
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(function ($subject) {
+                    return [
+                        'id' => (int) $subject->id,
+                        'shortcode' => (string) $subject->shortcode,
+                        'name' => (string) $subject->name,
+                    ];
+                })
+                ->values()
+                ->all();
             return Reply::successWithData($subjects, '');
         } catch (\Exception $error) {
             return $this->handleException($error);
@@ -39,7 +48,8 @@ class SubjectController extends Controller
 
         DB::beginTransaction();
         try {
-            Subject::create($request->validated());
+            $data = $request->validated();
+            Subject::create($data);
             DB::commit();
             return Reply::successWithMessage(trans('app.successes.record_save_success'));
         } catch (\Exception $error) {
@@ -73,7 +83,8 @@ class SubjectController extends Controller
         DB::beginTransaction();
         try {
             $subject = Subject::findOrFail($id);
-            $subject->update($request->validated());
+            $data = $request->validated();
+            $subject->update($data);
             DB::commit();
             return Reply::successWithMessage(trans('app.successes.record_save_success'));
         } catch (\Exception $error) {
@@ -89,7 +100,8 @@ class SubjectController extends Controller
 
         DB::beginTransaction();
         try {
-            Subject::destroy($id);
+            $subject = Subject::findOrFail($id);
+            $subject->delete();
             DB::commit();
             return Reply::successWithMessage(trans('app.successes.record_delete_success'));
         } catch (\Exception $error) {
@@ -112,4 +124,5 @@ class SubjectController extends Controller
             return $this->handleException($error);
         }
     }
+
 }

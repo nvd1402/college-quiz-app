@@ -8,6 +8,7 @@ export default {
         // perPage: 'Số hàng',
         search: 'Tìm kiếm'
     },
+    viewDocument: 'Xem tài liệu PDF',
     langYes: 'Có',
     langNo: 'Không'
 };
